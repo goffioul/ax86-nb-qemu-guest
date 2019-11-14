@@ -1,0 +1,145 @@
+From f66de63f73c4778ed47af0020d5433fe7be57e89 Mon Sep 17 00:00:00 2001
+From: Michael Goffioul <michael.goffioul@lincor.com>
+Date: Thu, 14 Nov 2019 10:31:56 -0500
+Subject: [PATCH] Support for QEMU-based native bridge
+
+Change-Id: I806ddfa48e94d7a31ba77f7951c66d375a24ba95
+---
+ libc/bionic/pthread_create.cpp | 24 ++++++++++++++++++++++++
+ libc/bionic/pthread_exit.cpp   | 23 +++++++++++++++++++++++
+ libc/libc.arm.map              |  2 ++
+ libc/private/bionic_fortify.h  |  2 +-
+ linker/linker.cpp              |  8 ++++----
+ linker/linker_phdr.cpp         |  2 ++
+ 6 files changed, 56 insertions(+), 5 deletions(-)
+
+diff --git a/libc/bionic/pthread_create.cpp b/libc/bionic/pthread_create.cpp
+index 21a707ba0..2b955e669 100644
+--- a/libc/bionic/pthread_create.cpp
++++ b/libc/bionic/pthread_create.cpp
+@@ -341,3 +341,27 @@ int pthread_create(pthread_t* thread_out, pthread_attr_t const* attr,
+ 
+   return 0;
+ }
++
++extern "C"
++int __pthread_allocate_self(void **stack, void **tls) {
++  pthread_attr_t attr;
++  pthread_attr_init(&attr);
++  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
++
++  pthread_internal_t* thread = NULL;
++  void* child_stack = NULL;
++  int result = __allocate_thread(&attr, &thread, &child_stack);
++  if (result != 0) {
++      return result;
++  }
++
++  thread->set_cached_pid(getpid());
++  thread->tid = __get_thread()->tid;
++  __init_thread(thread);
++  __pthread_internal_add(thread);
++
++  *stack = child_stack;
++  *tls = reinterpret_cast<void*>(thread->tls);
++
++  return 0;
++}
+diff --git a/libc/bionic/pthread_exit.cpp b/libc/bionic/pthread_exit.cpp
+index f1b65fdf7..34c808474 100644
+--- a/libc/bionic/pthread_exit.cpp
++++ b/libc/bionic/pthread_exit.cpp
+@@ -135,3 +135,26 @@ void pthread_exit(void* return_value) {
+   __pthread_unmap_tls(thread);
+   __exit(0);
+ }
++
++extern "C"
++void __pthread_deallocate_self(void **stack, size_t *size) {
++  __cxa_thread_finalize();
++
++  pthread_internal_t* thread = __get_thread();
++
++  while (thread->cleanup_stack) {
++    __pthread_cleanup_t* c = thread->cleanup_stack;
++    thread->cleanup_stack = c->__cleanup_prev;
++    c->__cleanup_routine(c->__cleanup_arg);
++  }
++
++  pthread_key_clean_all();
++  __set_tid_address(NULL);
++  __pthread_internal_remove(thread);
++
++  *stack = thread->attr.stack_base;
++  *size = thread->mmap_size;
++
++  ScopedSignalBlocker ssb;
++  __pthread_unmap_tls(thread);
++}
+diff --git a/libc/libc.arm.map b/libc/libc.arm.map
+index b0f96a9ff..4b86e4ba0 100644
+--- a/libc/libc.arm.map
++++ b/libc/libc.arm.map
+@@ -1655,4 +1655,6 @@ LIBC_PLATFORM {
+     malloc_disable;
+     malloc_enable;
+     malloc_iterate;
++    __pthread_allocate_self;
++    __pthread_deallocate_self;
+ } LIBC_P;
+diff --git a/libc/private/bionic_fortify.h b/libc/private/bionic_fortify.h
+index 7f22963cb..97f6611ef 100644
+--- a/libc/private/bionic_fortify.h
++++ b/libc/private/bionic_fortify.h
+@@ -38,7 +38,7 @@
+ static inline __noreturn void __fortify_fatal(const char* fmt, ...) {
+   va_list args;
+   va_start(args, fmt);
+-  async_safe_fatal_va_list("FORTIFY", fmt, args);
++  async_safe_fatal_va_list("FORTIFY [arm]", fmt, args);
+   va_end(args);
+   abort();
+ }
+diff --git a/linker/linker.cpp b/linker/linker.cpp
+index c78b9aba6..920e6254e 100644
+--- a/linker/linker.cpp
++++ b/linker/linker.cpp
+@@ -87,10 +87,10 @@ static LinkerTypeAllocator<LinkedListEntry<soinfo>> g_soinfo_links_allocator;
+ static LinkerTypeAllocator<android_namespace_t> g_namespace_allocator;
+ static LinkerTypeAllocator<LinkedListEntry<android_namespace_t>> g_namespace_list_allocator;
+ 
+-static const char* const kLdConfigArchFilePath = "/system/etc/ld.config." ABI_STRING ".txt";
++static const char* const kLdConfigArchFilePath = "/system/lib/arm/ld.config." ABI_STRING ".txt";
+ 
+-static const char* const kLdConfigFilePath = "/system/etc/ld.config.txt";
+-static const char* const kLdConfigVndkLiteFilePath = "/system/etc/ld.config.vndk_lite.txt";
++static const char* const kLdConfigFilePath = "/system/lib/arm/ld.config.txt";
++static const char* const kLdConfigVndkLiteFilePath = "/system/lib/arm/ld.config.vndk_lite.txt";
+ 
+ #if defined(__LP64__)
+ static const char* const kSystemLibDir     = "/system/lib64";
+@@ -100,7 +100,7 @@ static const char* const kAsanSystemLibDir = "/data/asan/system/lib64";
+ static const char* const kAsanOdmLibDir    = "/data/asan/odm/lib64";
+ static const char* const kAsanVendorLibDir = "/data/asan/vendor/lib64";
+ #else
+-static const char* const kSystemLibDir     = "/system/lib";
++static const char* const kSystemLibDir     = "/system/lib/arm";
+ static const char* const kOdmLibDir        = "/odm/lib";
+ static const char* const kVendorLibDir     = "/vendor/lib";
+ static const char* const kAsanSystemLibDir = "/data/asan/system/lib";
+diff --git a/linker/linker_phdr.cpp b/linker/linker_phdr.cpp
+index a5eab44ec..1d009b1b8 100644
+--- a/linker/linker_phdr.cpp
++++ b/linker/linker_phdr.cpp
+@@ -679,6 +679,8 @@ bool ElfReader::LoadSegments() {
+         DL_ERR("couldn't map \"%s\" segment %zd: %s", name_.c_str(), i, strerror(errno));
+         return false;
+       }
++      INFO("[ map: %p - %p  %08x  %016llx - %s ]",
++           seg_addr, reinterpret_cast<char *>(seg_addr) + file_length, file_length, file_offset_ + file_page_start, name_.c_str());
+     }
+ 
+     // if the segment is writable, and does not end on a page boundary,
+-- 
+2.21.0
+
