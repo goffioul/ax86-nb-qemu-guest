@@ -33,89 +33,139 @@ extern JavaVM nb_qemu_JavaVM;
 #define CALLBACK_ID(type, cb) (offsetof(type, cb) / sizeof(void *))
 #define JAVAVM_CALLBACK_ID(cb) CALLBACK_ID(struct JNIInvokeInterface, cb)
 #define JNIENV_CALLBACK_ID(cb) CALLBACK_ID(struct JNINativeInterface, cb)
+#define UNUSED(x) x __attribute__((unused))
 
-static jint nb_qemu_jnienv_GetVersion(JNIEnv *env) {
+static jint nb_qemu_jnienv_GetVersion(JNIEnv* UNUSED(env)) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetVersion));
 }
 
-static void nb_qemu_jnienv_DefineClass(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: DefineClass"); }
+static jclass nb_qemu_jnienv_DefineClass(JNIEnv* UNUSED(env), const char *name, jobject loader, const jbyte *buf, jsize bufLen) {
+    jclass ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(DefineClass), name, loader, buf, bufLen, &ret) == 0)
+      return ret;
+    return NULL;
+}
 
-static jclass nb_qemu_jnienv_FindClass(JNIEnv *env, const char *name) {
+static jclass nb_qemu_jnienv_FindClass(JNIEnv* UNUSED(env), const char *name) {
     jclass cls;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(FindClass), name, &cls) == 0)
       return cls;
     return NULL;
 }
 
-static void nb_qemu_jnienv_FromReflectedMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: FromReflectedMethod"); }
-static void nb_qemu_jnienv_FromReflectedField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: FromReflectedField"); }
-static void nb_qemu_jnienv_ToReflectedMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: ToReflectedMethod"); }
-static void nb_qemu_jnienv_GetSuperclass(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetSuperclass"); }
-static void nb_qemu_jnienv_IsAssignableFrom(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: IsAssignableFrom"); }
-static void nb_qemu_jnienv_ToReflectedField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: ToReflectedField"); }
+static jmethodID nb_qemu_jnienv_FromReflectedMethod(JNIEnv* UNUSED(env), jobject method) {
+    jmethodID ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(FromReflectedMethod), method, &ret) == 0)
+      return ret;
+    return NULL;
+}
 
-static jint nb_qemu_jnienv_Throw(JNIEnv *env, jthrowable thr) {
+static jfieldID nb_qemu_jnienv_FromReflectedField(JNIEnv* UNUSED(env), jobject field) {
+    jfieldID ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(FromReflectedField), field, &ret) == 0)
+      return ret;
+    return NULL;
+}
+
+static jobject nb_qemu_jnienv_ToReflectedMethod(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, jboolean isStatic) {
+    jobject ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ToReflectedMethod), cls, mID, isStatic, &ret) == 0)
+      return ret;
+    return NULL;
+}
+
+static jclass nb_qemu_jnienv_GetSuperclass(JNIEnv* UNUSED(env), jclass cls) {
+    jclass ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetSuperclass), cls, &ret) == 0)
+      return ret;
+    return NULL;
+}
+
+static jboolean nb_qemu_jnienv_IsAssignableFrom(JNIEnv* UNUSED(env), jclass cls1, jclass cls2) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(IsAssignableFrom), cls1, cls2);
+}
+
+static jobject nb_qemu_jnienv_ToReflectedField(JNIEnv* UNUSED(env), jclass cls, jfieldID fID, jboolean isStatic) {
+    jobject ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ToReflectedField), cls, fID, isStatic, &ret) == 0)
+      return ret;
+    return NULL;
+}
+
+static jint nb_qemu_jnienv_Throw(JNIEnv* UNUSED(env), jthrowable thr) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Throw), thr);
 }
 
-static jint nb_qemu_jnienv_ThrowNew(JNIEnv *env, jclass cls, const char *message) {
+static jint nb_qemu_jnienv_ThrowNew(JNIEnv* UNUSED(env), jclass cls, const char *message) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ThrowNew), cls, message);
 }
 
-static jthrowable nb_qemu_jnienv_ExceptionOccurred(JNIEnv *env) {
+static jthrowable nb_qemu_jnienv_ExceptionOccurred(JNIEnv* UNUSED(env)) {
     jthrowable thr;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ExceptionOccurred), &thr) == 0)
       return thr;
     return NULL;
 }
 
-static void nb_qemu_jnienv_ExceptionDescribe(JNIEnv *env) {
+static void nb_qemu_jnienv_ExceptionDescribe(JNIEnv* UNUSED(env)) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ExceptionDescribe));
 }
 
-static void nb_qemu_jnienv_ExceptionClear(JNIEnv *env) {
+static void nb_qemu_jnienv_ExceptionClear(JNIEnv* UNUSED(env)) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ExceptionClear));
 }
 
-static void nb_qemu_jnienv_FatalError(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: FatalError"); }
+static void nb_qemu_jnienv_FatalError(JNIEnv* UNUSED(env), const char *msg) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(FatalError), msg);
+}
 
-static jint nb_qemu_jnienv_PushLocalFrame(JNIEnv *env, jint capacity) {
+static jint nb_qemu_jnienv_PushLocalFrame(JNIEnv* UNUSED(env), jint capacity) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(PushLocalFrame), capacity);
 }
 
-static jobject nb_qemu_jnienv_PopLocalFrame(JNIEnv *env, jobject result) {
+static jobject nb_qemu_jnienv_PopLocalFrame(JNIEnv* UNUSED(env), jobject result) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(PopLocalFrame), result, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static jobject nb_qemu_jnienv_NewGlobalRef(JNIEnv *env, jobject obj) {
+static jobject nb_qemu_jnienv_NewGlobalRef(JNIEnv* UNUSED(env), jobject obj) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewGlobalRef), obj, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static void nb_qemu_jnienv_DeleteGlobalRef(JNIEnv *env, jobject obj) {
+static void nb_qemu_jnienv_DeleteGlobalRef(JNIEnv* UNUSED(env), jobject obj) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(DeleteGlobalRef), obj);
 }
 
-static void nb_qemu_jnienv_DeleteLocalRef(JNIEnv *env, jobject obj) {
+static void nb_qemu_jnienv_DeleteLocalRef(JNIEnv* UNUSED(env), jobject obj) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(DeleteLocalRef), obj);
 }
 
-static void nb_qemu_jnienv_IsSameObject(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: IsSameObject"); }
+static jboolean nb_qemu_jnienv_IsSameObject(JNIEnv* UNUSED(env), jobject obj1, jobject obj2) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(IsSameObject), obj1, obj2);
+}
 
-static jobject nb_qemu_jnienv_NewLocalRef(JNIEnv *env, jobject obj) {
+static jobject nb_qemu_jnienv_NewLocalRef(JNIEnv* UNUSED(env), jobject obj) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewLocalRef), obj, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static void nb_qemu_jnienv_EnsureLocalCapacity(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: EnsureLocalCapacity"); }
-static void nb_qemu_jnienv_AllocObject(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: AllocObject"); }
+static jint nb_qemu_jnienv_EnsureLocalCapacity(JNIEnv* UNUSED(env), jint capacity) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(EnsureLocalCapacity), capacity);
+}
+
+static jobject nb_qemu_jnienv_AllocObject(JNIEnv* UNUSED(env), jclass cls) {
+    jobject ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(AllocObject), cls, &ret) == 0)
+      return ret;
+    return NULL;
+}
 
 static jobject nb_qemu_jnienv_NewObject(JNIEnv *env, jclass cls, jmethodID mID, ...) {
     va_list args;
@@ -126,24 +176,32 @@ static jobject nb_qemu_jnienv_NewObject(JNIEnv *env, jclass cls, jmethodID mID, 
     return ret;
 }
 
-static jobject nb_qemu_jnienv_NewObjectV(JNIEnv *env, jclass cls, jmethodID mID, va_list args) {
+static jobject nb_qemu_jnienv_NewObjectV(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, va_list args) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewObjectV), cls, mID, args, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static jobject nb_qemu_jnienv_NewObjectA(JNIEnv *env, jclass cls, jmethodID mID, const jvalue *args) {
+static jobject nb_qemu_jnienv_NewObjectA(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, const jvalue *args) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewObjectA), cls, mID, args, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static void nb_qemu_jnienv_GetObjectClass(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetObjectClass"); }
-static void nb_qemu_jnienv_IsInstanceOf(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: IsInstanceOf"); }
+static jclass nb_qemu_jnienv_GetObjectClass(JNIEnv* UNUSED(env), jobject obj) {
+    jclass ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetObjectClass), obj, &ret) == 0)
+      return ret;
+    return NULL;
+}
 
-static jmethodID nb_qemu_jnienv_GetMethodID(JNIEnv *env, jclass cls, const char *name, const char *sig) {
+static jboolean nb_qemu_jnienv_IsInstanceOf(JNIEnv* UNUSED(env), jobject obj, jclass cls) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(IsInstanceOf), obj, cls);
+}
+
+static jmethodID nb_qemu_jnienv_GetMethodID(JNIEnv* UNUSED(env), jclass cls, const char *name, const char *sig) {
     jmethodID mID;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetMethodID), cls, name, sig, &mID) == 0)
       return mID;
@@ -160,14 +218,14 @@ static type nb_qemu_jnienv_Call##name##Method(JNIEnv *env, jobject obj, jmethodI
     return ret; \
 } \
  \
-static type nb_qemu_jnienv_Call##name##MethodV(JNIEnv *env, jobject obj, jmethodID mID, va_list args) { \
+static type nb_qemu_jnienv_Call##name##MethodV(JNIEnv* UNUSED(env), jobject obj, jmethodID mID, va_list args) { \
     type ret; \
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Call##name##MethodV), obj, mID, args, &ret) == 0) \
       return ret; \
     return null; \
 } \
  \
-static type nb_qemu_jnienv_Call##name##MethodA(JNIEnv *env, jobject obj, jmethodID mID, jvalue *args) { \
+static type nb_qemu_jnienv_Call##name##MethodA(JNIEnv* UNUSED(env), jobject obj, jmethodID mID, const jvalue *args) { \
     type ret; \
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Call##name##MethodA), obj, mID, args, &ret) == 0) \
       return ret; \
@@ -191,46 +249,64 @@ static void nb_qemu_jnienv_CallVoidMethod(JNIEnv *env, jobject obj, jmethodID mI
     va_end(args);
 }
 
-static void nb_qemu_jnienv_CallVoidMethodV(JNIEnv *env, jobject obj, jmethodID mID, va_list args) {
+static void nb_qemu_jnienv_CallVoidMethodV(JNIEnv* UNUSED(env), jobject obj, jmethodID mID, va_list args) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallVoidMethodV), obj, mID, args);
 }
 
-static void nb_qemu_jnienv_CallVoidMethodA(JNIEnv *env, jobject obj, jmethodID mID, jvalue *args) {
+static void nb_qemu_jnienv_CallVoidMethodA(JNIEnv* UNUSED(env), jobject obj, jmethodID mID, const jvalue *args) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallVoidMethodA), obj, mID, args);
 }
 
-static void nb_qemu_jnienv_CallNonvirtualObjectMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualObjectMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualObjectMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualObjectMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualObjectMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualObjectMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualBooleanMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualBooleanMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualBooleanMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualBooleanMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualBooleanMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualBooleanMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualByteMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualByteMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualByteMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualByteMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualByteMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualByteMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualCharMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualCharMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualCharMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualCharMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualCharMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualCharMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualShortMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualShortMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualShortMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualShortMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualShortMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualShortMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualIntMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualIntMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualIntMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualIntMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualIntMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualIntMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualLongMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualLongMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualLongMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualLongMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualLongMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualLongMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualFloatMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualFloatMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualFloatMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualFloatMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualFloatMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualFloatMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualDoubleMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualDoubleMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualDoubleMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualDoubleMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualDoubleMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualDoubleMethodA"); }
-static void nb_qemu_jnienv_CallNonvirtualVoidMethod(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualVoidMethod"); }
-static void nb_qemu_jnienv_CallNonvirtualVoidMethodV(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualVoidMethodV"); }
-static void nb_qemu_jnienv_CallNonvirtualVoidMethodA(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: CallNonvirtualVoidMethodA"); }
+#define CALL_NONVIRTUAL_METHOD_WRAPPER(name, type, null) \
+static type nb_qemu_jnienv_CallNonvirtual##name##Method(JNIEnv *env, jobject obj, jclass cls, jmethodID mID, ...) { \
+    va_list args; \
+    type ret; \
+    va_start(args, mID); \
+    ret = (*env)->CallNonvirtual##name##MethodV(env, obj, cls, mID, args); \
+    va_end(args); \
+    return ret; \
+} \
+ \
+static type nb_qemu_jnienv_CallNonvirtual##name##MethodV(JNIEnv* UNUSED(env), jobject obj, jclass cls, jmethodID mID, va_list args) { \
+    type ret; \
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallNonvirtual##name##MethodV), obj, cls, mID, args, &ret) == 0) \
+      return ret; \
+    return null; \
+} \
+ \
+static type nb_qemu_jnienv_CallNonvirtual##name##MethodA(JNIEnv* UNUSED(env), jobject obj, jclass cls, jmethodID mID, const jvalue *args) { \
+    type ret; \
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallNonvirtual##name##MethodA), obj, cls, mID, args, &ret) == 0) \
+      return ret; \
+    return null; \
+}
 
-static jfieldID nb_qemu_jnienv_GetFieldID(JNIEnv *env, jclass cls, const char *name, const char *sig) {
+CALL_NONVIRTUAL_METHOD_WRAPPER(Object, jobject, NULL)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Boolean, jboolean, JNI_FALSE)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Byte, jbyte, 0)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Char, jchar, 0)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Short, jshort, 0)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Int, jint, 0)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Long, jlong, 0)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Float, jfloat, 0)
+CALL_NONVIRTUAL_METHOD_WRAPPER(Double, jdouble, 0)
+
+static void nb_qemu_jnienv_CallNonvirtualVoidMethod(JNIEnv *env, jobject obj, jclass cls, jmethodID mID, ...) {
+    va_list args;
+    va_start(args, mID);
+    (*env)->CallNonvirtualVoidMethodV(env, obj, cls, mID, args);
+    va_end(args);
+}
+
+static void nb_qemu_jnienv_CallNonvirtualVoidMethodV(JNIEnv* UNUSED(env), jobject obj, jclass cls, jmethodID mID, va_list args) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallNonvirtualVoidMethodV), obj, cls, mID, args);
+}
+
+static void nb_qemu_jnienv_CallNonvirtualVoidMethodA(JNIEnv* UNUSED(env), jobject obj, jclass cls, jmethodID mID, const jvalue *args) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallNonvirtualVoidMethodA), obj, cls, mID, args);
+}
+
+static jfieldID nb_qemu_jnienv_GetFieldID(JNIEnv* UNUSED(env), jclass cls, const char *name, const char *sig) {
     jfieldID fID;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetFieldID), cls, name, sig, &fID) == 0)
       return fID;
@@ -238,7 +314,7 @@ static jfieldID nb_qemu_jnienv_GetFieldID(JNIEnv *env, jclass cls, const char *n
 }
 
 #define GET_FIELD_WRAPPER(name, type, null) \
-static type nb_qemu_jnienv_Get##name##Field(JNIEnv *env, jobject obj, jfieldID fID) { \
+static type nb_qemu_jnienv_Get##name##Field(JNIEnv* UNUSED(env), jobject obj, jfieldID fID) { \
     type ret = null; \
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Get##name##Field), obj, fID, &ret); \
     return ret; \
@@ -255,7 +331,7 @@ GET_FIELD_WRAPPER(Float, jfloat, 0)
 GET_FIELD_WRAPPER(Double, jdouble, 0)
 
 #define SET_FIELD_WRAPPER(name, type) \
-static void nb_qemu_jnienv_Set##name##Field(JNIEnv *env, jobject obj, jfieldID fID, type value) { \
+static void nb_qemu_jnienv_Set##name##Field(JNIEnv* UNUSED(env), jobject obj, jfieldID fID, type value) { \
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Set##name##Field), obj, fID, &value); \
 }
 
@@ -269,7 +345,7 @@ SET_FIELD_WRAPPER(Long, jlong)
 SET_FIELD_WRAPPER(Float, jfloat)
 SET_FIELD_WRAPPER(Double, jdouble)
 
-static jmethodID nb_qemu_jnienv_GetStaticMethodID(JNIEnv *env, jclass cls, const char *name, const char *sig) {
+static jmethodID nb_qemu_jnienv_GetStaticMethodID(JNIEnv* UNUSED(env), jclass cls, const char *name, const char *sig) {
     jmethodID mID;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStaticMethodID), cls, name, sig, &mID) == 0)
       return mID;
@@ -286,14 +362,14 @@ static type nb_qemu_jnienv_CallStatic##name##Method(JNIEnv *env, jclass cls, jme
     return ret; \
 } \
  \
-static type nb_qemu_jnienv_CallStatic##name##MethodV(JNIEnv *env, jclass cls, jmethodID mID, va_list args) { \
+static type nb_qemu_jnienv_CallStatic##name##MethodV(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, va_list args) { \
     type ret; \
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallStatic##name##MethodV), cls, mID, args, &ret) == 0) \
       return ret; \
     return null; \
 } \
  \
-static type nb_qemu_jnienv_CallStatic##name##MethodA(JNIEnv *env, jclass cls, jmethodID mID, jvalue *args) { \
+static type nb_qemu_jnienv_CallStatic##name##MethodA(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, const jvalue *args) { \
     type ret; \
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallStatic##name##MethodA), cls, mID, args, &ret) == 0) \
       return ret; \
@@ -317,15 +393,15 @@ static void nb_qemu_jnienv_CallStaticVoidMethod(JNIEnv *env, jclass cls, jmethod
     va_end(args);
 }
 
-static void nb_qemu_jnienv_CallStaticVoidMethodV(JNIEnv *env, jclass cls, jmethodID mID, va_list args) {
+static void nb_qemu_jnienv_CallStaticVoidMethodV(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, va_list args) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallStaticVoidMethodV), cls, mID, args);
 }
 
-static void nb_qemu_jnienv_CallStaticVoidMethodA(JNIEnv *env, jclass cls, jmethodID mID, jvalue *args) {
+static void nb_qemu_jnienv_CallStaticVoidMethodA(JNIEnv* UNUSED(env), jclass cls, jmethodID mID, const jvalue *args) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(CallStaticVoidMethodA), cls, mID, args);
 }
 
-static jfieldID nb_qemu_jnienv_GetStaticFieldID(JNIEnv *env, jclass cls, const char *name, const char *sig) {
+static jfieldID nb_qemu_jnienv_GetStaticFieldID(JNIEnv* UNUSED(env), jclass cls, const char *name, const char *sig) {
     jfieldID fID;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStaticFieldID), cls, name, sig, &fID) == 0)
       return fID;
@@ -333,7 +409,7 @@ static jfieldID nb_qemu_jnienv_GetStaticFieldID(JNIEnv *env, jclass cls, const c
 }
 
 #define GET_STATIC_FIELD_WRAPPER(name, type, null) \
-static type nb_qemu_jnienv_GetStatic##name##Field(JNIEnv *env, jclass cls, jfieldID fID) { \
+static type nb_qemu_jnienv_GetStatic##name##Field(JNIEnv* UNUSED(env), jclass cls, jfieldID fID) { \
     type ret = null; \
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStatic##name##Field), cls, fID, &ret); \
     return ret; \
@@ -349,109 +425,113 @@ GET_STATIC_FIELD_WRAPPER(Long, jlong, 0)
 GET_STATIC_FIELD_WRAPPER(Float, jfloat, 0)
 GET_STATIC_FIELD_WRAPPER(Double, jdouble, 0)
 
-static void nb_qemu_jnienv_SetStaticObjectField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticObjectField"); }
-static void nb_qemu_jnienv_SetStaticBooleanField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticBooleanField"); }
-static void nb_qemu_jnienv_SetStaticByteField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticByteField"); }
-static void nb_qemu_jnienv_SetStaticCharField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticCharField"); }
-static void nb_qemu_jnienv_SetStaticShortField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticShortField"); }
-static void nb_qemu_jnienv_SetStaticIntField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticIntField"); }
-static void nb_qemu_jnienv_SetStaticLongField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticLongField"); }
-static void nb_qemu_jnienv_SetStaticFloatField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticFloatField"); }
-static void nb_qemu_jnienv_SetStaticDoubleField(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: SetStaticDoubleField"); }
+#define SET_STATIC_FIELD_WRAPPER(name, type) \
+static void nb_qemu_jnienv_SetStatic##name##Field(JNIEnv* UNUSED(env), jclass cls, jfieldID fID, type value) { \
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(SetStatic##name##Field), cls, fID, &value); \
+}
 
-static jstring nb_qemu_jnienv_NewString(JNIEnv *env, const jchar *chars, jsize len) {
+SET_STATIC_FIELD_WRAPPER(Object, jobject)
+SET_STATIC_FIELD_WRAPPER(Boolean, jboolean)
+SET_STATIC_FIELD_WRAPPER(Byte, jbyte)
+SET_STATIC_FIELD_WRAPPER(Char, jchar)
+SET_STATIC_FIELD_WRAPPER(Short, jshort)
+SET_STATIC_FIELD_WRAPPER(Int, jint)
+SET_STATIC_FIELD_WRAPPER(Long, jlong)
+SET_STATIC_FIELD_WRAPPER(Float, jfloat)
+SET_STATIC_FIELD_WRAPPER(Double, jdouble)
+
+static jstring nb_qemu_jnienv_NewString(JNIEnv* UNUSED(env), const jchar *chars, jsize len) {
     jstring ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewString), chars, len, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static jsize nb_qemu_jnienv_GetStringLength(JNIEnv *env, jstring str) {
+static jsize nb_qemu_jnienv_GetStringLength(JNIEnv* UNUSED(env), jstring str) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringLength), str);
 }
 
-static const jchar *nb_qemu_jnienv_GetStringChars(JNIEnv *env, jstring str, jboolean *isCopy) {
+static const jchar *nb_qemu_jnienv_GetStringChars(JNIEnv* UNUSED(env), jstring str, jboolean *isCopy) {
     const jchar *ptr;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringChars), str, isCopy, &ptr) == 0)
       return ptr;
     return NULL;
 }
 
-static void nb_qemu_jnienv_ReleaseStringChars(JNIEnv *env, jstring str, const jchar *chars) {
+static void nb_qemu_jnienv_ReleaseStringChars(JNIEnv* UNUSED(env), jstring str, const jchar *chars) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ReleaseStringChars), str, chars);
 }
 
-static jstring nb_qemu_jnienv_NewStringUTF(JNIEnv *env, const char *bytes) {
+static jstring nb_qemu_jnienv_NewStringUTF(JNIEnv* UNUSED(env), const char *bytes) {
     jstring ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewStringUTF), bytes, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static jsize nb_qemu_jnienv_GetStringUTFLength(JNIEnv *env, jstring str) {
+static jsize nb_qemu_jnienv_GetStringUTFLength(JNIEnv* UNUSED(env), jstring str) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringUTFLength), str);
 }
 
-static const char *nb_qemu_jnienv_GetStringUTFChars(JNIEnv *env, jstring str, jboolean *isCopy) {
+static const char *nb_qemu_jnienv_GetStringUTFChars(JNIEnv* UNUSED(env), jstring str, jboolean *isCopy) {
     const char *ptr;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringUTFChars), str, isCopy, &ptr) == 0)
       return ptr;
     return NULL;
 }
 
-static void nb_qemu_jnienv_ReleaseStringUTFChars(JNIEnv *env, jstring str, const char *utf) {
+static void nb_qemu_jnienv_ReleaseStringUTFChars(JNIEnv* UNUSED(env), jstring str, const char *utf) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ReleaseStringUTFChars), str, utf);
 }
 
-static jsize nb_qemu_jnienv_GetArrayLength(JNIEnv *env, jarray array) {
+static jsize nb_qemu_jnienv_GetArrayLength(JNIEnv* UNUSED(env), jarray array) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetArrayLength), array);
 }
 
-static jobjectArray nb_qemu_jnienv_NewObjectArray(JNIEnv *env, jsize len, jclass cls, jobject obj) {
+static jobjectArray nb_qemu_jnienv_NewObjectArray(JNIEnv* UNUSED(env), jsize len, jclass cls, jobject obj) {
     jobjectArray ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewObjectArray), len, cls, obj, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static jobject nb_qemu_jnienv_GetObjectArrayElement(JNIEnv *env, jobjectArray array, jsize index) {
+static jobject nb_qemu_jnienv_GetObjectArrayElement(JNIEnv* UNUSED(env), jobjectArray array, jsize index) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetObjectArrayElement), array, index, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static void nb_qemu_jnienv_SetObjectArrayElement(JNIEnv *env, jobjectArray array, jsize index, jobject value) {
+static void nb_qemu_jnienv_SetObjectArrayElement(JNIEnv* UNUSED(env), jobjectArray array, jsize index, jobject value) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(SetObjectArrayElement), array, index, value);
 }
 
 #define NEW_ARRAY_WRAPPER(name, atype) \
-static atype nb_qemu_jnienv_New##name##Array(JNIEnv *env, jsize len) { \
+static atype nb_qemu_jnienv_New##name##Array(JNIEnv* UNUSED(env), jsize len) { \
     atype ret; \
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(New##name##Array), len, &ret) == 0) \
       return ret; \
     return NULL; \
 }
 
+NEW_ARRAY_WRAPPER(Boolean, jbooleanArray)
 NEW_ARRAY_WRAPPER(Byte, jbyteArray)
-
-static void nb_qemu_jnienv_NewBooleanArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewBooleanArray"); }
-static void nb_qemu_jnienv_NewCharArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewCharArray"); }
-static void nb_qemu_jnienv_NewShortArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewShortArray"); }
-static void nb_qemu_jnienv_NewIntArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewIntArray"); }
-static void nb_qemu_jnienv_NewLongArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewLongArray"); }
-static void nb_qemu_jnienv_NewFloatArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewFloatArray"); }
-static void nb_qemu_jnienv_NewDoubleArray(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: NewDoubleArray"); }
+NEW_ARRAY_WRAPPER(Char, jcharArray)
+NEW_ARRAY_WRAPPER(Short, jshortArray)
+NEW_ARRAY_WRAPPER(Int, jintArray)
+NEW_ARRAY_WRAPPER(Long, jlongArray)
+NEW_ARRAY_WRAPPER(Float, jfloatArray)
+NEW_ARRAY_WRAPPER(Double, jdoubleArray)
 
 #define ACCESS_ARRAY_ELEMENTS(name, type, atype) \
-static type *nb_qemu_jnienv_Get##name##ArrayElements(JNIEnv *env, atype array, jboolean *isCopy) { \
+static type *nb_qemu_jnienv_Get##name##ArrayElements(JNIEnv* UNUSED(env), atype array, jboolean *isCopy) { \
     type *ptr; \
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Get##name##ArrayElements), array, isCopy, &ptr) == 0) \
       return ptr; \
     return NULL; \
 } \
  \
-static void nb_qemu_jnienv_Release##name##ArrayElements(JNIEnv *env, atype array, type *elems, jint mode) { \
+static void nb_qemu_jnienv_Release##name##ArrayElements(JNIEnv* UNUSED(env), atype array, type *elems, jint mode) { \
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Release##name##ArrayElements), array, elems, mode); \
 }
 
@@ -465,11 +545,11 @@ ACCESS_ARRAY_ELEMENTS(Float, jfloat, jfloatArray)
 ACCESS_ARRAY_ELEMENTS(Double, jdouble, jdoubleArray)
 
 #define ACCESS_ARRAY_REGION(name, type, atype) \
-static void nb_qemu_jnienv_Get##name##ArrayRegion(JNIEnv *env, atype array, jsize start, jsize len, type *buf) { \
+static void nb_qemu_jnienv_Get##name##ArrayRegion(JNIEnv* UNUSED(env), atype array, jsize start, jsize len, type *buf) { \
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Get##name##ArrayRegion), array, start, len, buf); \
 } \
  \
-static void nb_qemu_jnienv_Set##name##ArrayRegion(JNIEnv *env, atype array, jsize start, jsize len, const type *buf) { \
+static void nb_qemu_jnienv_Set##name##ArrayRegion(JNIEnv* UNUSED(env), atype array, jsize start, jsize len, const type *buf) { \
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(Set##name##ArrayRegion), array, start, len, buf); \
 }
 
@@ -482,66 +562,98 @@ ACCESS_ARRAY_REGION(Long, jlong, jlongArray)
 ACCESS_ARRAY_REGION(Float, jfloat, jfloatArray)
 ACCESS_ARRAY_REGION(Double, jdouble, jdoubleArray)
 
-static jint nb_qemu_jnienv_RegisterNatives(JNIEnv *env, jclass cls, const JNINativeMethod *methods, jint nMethods) {
+static jint nb_qemu_jnienv_RegisterNatives(JNIEnv* UNUSED(env), jclass cls, const JNINativeMethod *methods, jint nMethods) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(RegisterNatives), cls, methods, nMethods);
 }
 
-static jint nb_qemu_jnienv_UnregisterNatives(JNIEnv *env, jclass cls) {
+static jint nb_qemu_jnienv_UnregisterNatives(JNIEnv* UNUSED(env), jclass cls) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(UnregisterNatives), cls);
 }
 
-static void nb_qemu_jnienv_MonitorEnter(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: MonitorEnter"); }
-static void nb_qemu_jnienv_MonitorExit(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: MonitorExit"); }
+static jint nb_qemu_jnienv_MonitorEnter(JNIEnv* UNUSED(env), jobject obj) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(MonitorEnter), obj);
+}
 
-static jint nb_qemu_jnienv_GetJavaVM(JNIEnv *env, JavaVM **vm) {
+static jint nb_qemu_jnienv_MonitorExit(JNIEnv* UNUSED(env), jobject obj) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(MonitorExit), obj);
+}
+
+static jint nb_qemu_jnienv_GetJavaVM(JNIEnv* UNUSED(env), JavaVM **vm) {
     int ret = syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetJavaVM));
     if (ret == 0)
       *vm = &nb_qemu_JavaVM;
     return 0;
 }
 
-static void nb_qemu_jnienv_GetStringRegion(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetStringRegion"); }
-static void nb_qemu_jnienv_GetStringUTFRegion(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetStringUTFRegion"); }
-static void nb_qemu_jnienv_GetPrimitiveArrayCritical(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetPrimitiveArrayCritical"); }
-static void nb_qemu_jnienv_ReleasePrimitiveArrayCritical(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: ReleasePrimitiveArrayCritical"); }
-static void nb_qemu_jnienv_GetStringCritical(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetStringCritical"); }
-static void nb_qemu_jnienv_ReleaseStringCritical(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: ReleaseStringCritical"); }
+static void nb_qemu_jnienv_GetStringRegion(JNIEnv* UNUSED(env), jstring str, jsize start, jsize len, jchar *buf) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringRegion), str, start, len, buf);
+}
 
-static jweak nb_qemu_jnienv_NewWeakGlobalRef(JNIEnv *env, jobject obj) {
+static void nb_qemu_jnienv_GetStringUTFRegion(JNIEnv* UNUSED(env), jstring str, jsize start, jsize len, char *buf) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringUTFRegion), str, start, len, buf);
+}
+
+static void *nb_qemu_jnienv_GetPrimitiveArrayCritical(JNIEnv* UNUSED(env), jarray array, jboolean *isCopy) {
+    void *ptr;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetPrimitiveArrayCritical), array, isCopy, &ptr) == 0)
+      return ptr;
+    return NULL;
+}
+
+static void nb_qemu_jnienv_ReleasePrimitiveArrayCritical(JNIEnv* UNUSED(env), jarray array, void *carray, jint mode) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ReleasePrimitiveArrayCritical), array, carray, mode);
+}
+
+static const jchar *nb_qemu_jnienv_GetStringCritical(JNIEnv* UNUSED(env), jstring str, jboolean *isCopy) {
+    const jchar *ptr;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetStringCritical), str, isCopy, &ptr) == 0)
+      return ptr;
+    return NULL;
+}
+
+static void nb_qemu_jnienv_ReleaseStringCritical(JNIEnv* UNUSED(env), jstring str, const jchar *chars) {
+    syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ReleaseStringCritical), str, chars);
+}
+
+static jweak nb_qemu_jnienv_NewWeakGlobalRef(JNIEnv* UNUSED(env), jobject obj) {
     jweak ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewWeakGlobalRef), obj, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static void nb_qemu_jnienv_DeleteWeakGlobalRef(JNIEnv *env, jweak obj) {
+static void nb_qemu_jnienv_DeleteWeakGlobalRef(JNIEnv* UNUSED(env), jweak obj) {
     syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(DeleteWeakGlobalRef), obj);
 }
 
-static jboolean nb_qemu_jnienv_ExceptionCheck(JNIEnv *env) {
+static jboolean nb_qemu_jnienv_ExceptionCheck(JNIEnv* UNUSED(env)) {
     return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(ExceptionCheck)) == 0 ? JNI_FALSE : JNI_TRUE;
 }
 
-static jobject nb_qemu_jnienv_NewDirectByteBuffer(JNIEnv *env, void *address, jlong capacity) {
+static jobject nb_qemu_jnienv_NewDirectByteBuffer(JNIEnv* UNUSED(env), void *address, jlong capacity) {
     jobject ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(NewDirectByteBuffer), address, &capacity, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static void *nb_qemu_jnienv_GetDirectBufferAddress(JNIEnv *env, jobject buf) {
+static void *nb_qemu_jnienv_GetDirectBufferAddress(JNIEnv* UNUSED(env), jobject buf) {
     void *ret;
     if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetDirectBufferAddress), buf, &ret) == 0)
       return ret;
     return NULL;
 }
 
-static jlong nb_qemu_jnienv_GetDirectBufferCapacity(JNIEnv *env, jobject buf) {
-    ALOGE("*** NOT SUPPORTED: GetDirectBufferCapacity");
+static jlong nb_qemu_jnienv_GetDirectBufferCapacity(JNIEnv* UNUSED(env), jobject buf) {
+    jlong ret;
+    if (syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetDirectBufferCapacity), buf, &ret) == 0)
+      return ret;
     return -1LL;
 }
 
-static void nb_qemu_jnienv_GetObjectRefType(JNIEnv *env) { ALOGE("*** UNIMPLEMENTED: GetObjectRefType"); }
+static jobjectRefType nb_qemu_jnienv_GetObjectRefType(JNIEnv* UNUSED(env), jobject obj) {
+    return syscall(__NR_host_jnienv, JNIENV_CALLBACK_ID(GetObjectRefType), obj);
+}
 
 static struct JNINativeInterface _jni_iface = {
     .reserved0 = NULL,
@@ -781,27 +893,33 @@ static struct JNINativeInterface _jni_iface = {
 
 JNIEnv nb_qemu_JNIEnv = &_jni_iface;
 
-static void nb_qemu_javavm_DestroyJavaVM(JavaVM *vm) { ALOGE("*** UNIMPLEMENTED: DestroyJavaVM"); }
+static jint nb_qemu_javavm_DestroyJavaVM(JavaVM* UNUSED(vm)) {
+    ALOGE("*** NOT SUPPORTED: DestroyJavaVM");
+    return JNI_ERR;
+}
 
-static jint nb_qemu_javavm_AttachCurrentThread(JavaVM *vm, void **p_env, void *thr_args) {
+static jint nb_qemu_javavm_AttachCurrentThread(JavaVM* UNUSED(vm), JNIEnv **p_env, void *thr_args) {
     jint result = syscall(__NR_host_javavm, JAVAVM_CALLBACK_ID(AttachCurrentThread), thr_args);
     if (result == JNI_OK)
       *p_env = &nb_qemu_JNIEnv;
     return result;
 }
 
-static jint nb_qemu_javavm_DetachCurrentThread(JavaVM *vm) {
+static jint nb_qemu_javavm_DetachCurrentThread(JavaVM* UNUSED(vm)) {
     return syscall(__NR_host_javavm, JAVAVM_CALLBACK_ID(DetachCurrentThread));
 }
 
-static jint nb_qemu_javavm_GetEnv(JavaVM *vm, void **env, jint version) {
+static jint nb_qemu_javavm_GetEnv(JavaVM* UNUSED(vm), void **env, jint version) {
     jint result = syscall(__NR_host_javavm, JAVAVM_CALLBACK_ID(GetEnv), version);
     if (result == JNI_OK)
       *env = &nb_qemu_JNIEnv;
     return result;
 }
 
-static void nb_qemu_javavm_AttachCurrentThreadAsDaemon(JavaVM *vm) { ALOGE("*** UNIMPLEMENTED: AttachCurrentThreadAsDaemon"); }
+static jint nb_qemu_javavm_AttachCurrentThreadAsDaemon(JavaVM* UNUSED(vm), JNIEnv** UNUSED(penv), void* UNUSED(args)) {
+    ALOGE("*** NOT SUPPORTED: AttachCurrentThreadAsDaemon");
+    return JNI_ERR;
+}
 
 struct JNIInvokeInterface _javavm_iface = {
     .reserved0 = NULL,
