@@ -1,23 +1,23 @@
-From f66de63f73c4778ed47af0020d5433fe7be57e89 Mon Sep 17 00:00:00 2001
+From cf3ee711c615e2af6647c7e64d10c425cff3e0c8 Mon Sep 17 00:00:00 2001
 From: Michael Goffioul <michael.goffioul@lincor.com>
-Date: Thu, 14 Nov 2019 10:31:56 -0500
+Date: Thu, 21 Nov 2019 19:22:39 -0500
 Subject: [PATCH] Support for QEMU-based native bridge
 
-Change-Id: I806ddfa48e94d7a31ba77f7951c66d375a24ba95
+Change-Id: I9f79292e64dab0f9382a6ee08a62c0cc56a1ee39
 ---
- libc/bionic/pthread_create.cpp | 24 ++++++++++++++++++++++++
- libc/bionic/pthread_exit.cpp   | 23 +++++++++++++++++++++++
- libc/libc.arm.map              |  2 ++
+ libc/bionic/pthread_create.cpp | 26 ++++++++++++++++++++++++++
+ libc/bionic/pthread_exit.cpp   | 24 ++++++++++++++++++++++++
+ libc/libc.map.txt              |  3 +++
  libc/private/bionic_fortify.h  |  2 +-
- linker/linker.cpp              |  8 ++++----
+ linker/linker.cpp              | 10 ++++++----
  linker/linker_phdr.cpp         |  2 ++
- 6 files changed, 56 insertions(+), 5 deletions(-)
+ 6 files changed, 62 insertions(+), 5 deletions(-)
 
 diff --git a/libc/bionic/pthread_create.cpp b/libc/bionic/pthread_create.cpp
-index 21a707ba0..2b955e669 100644
+index 4cf14ad72..3a857bbf4 100644
 --- a/libc/bionic/pthread_create.cpp
 +++ b/libc/bionic/pthread_create.cpp
-@@ -341,3 +341,27 @@ int pthread_create(pthread_t* thread_out, pthread_attr_t const* attr,
+@@ -428,3 +428,29 @@ int pthread_create(pthread_t* thread_out, pthread_attr_t const* attr,
  
    return 0;
  }
@@ -28,12 +28,14 @@ index 21a707ba0..2b955e669 100644
 +  pthread_attr_init(&attr);
 +  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 +
-+  pthread_internal_t* thread = NULL;
-+  void* child_stack = NULL;
-+  int result = __allocate_thread(&attr, &thread, &child_stack);
++  bionic_tcb* tcb = nullptr;
++  void* child_stack = nullptr;
++  int result = __allocate_thread(&attr, &tcb, &child_stack);
 +  if (result != 0) {
 +      return result;
 +  }
++
++  pthread_internal_t* thread = tcb->thread();
 +
 +  thread->set_cached_pid(getpid());
 +  thread->tid = __get_thread()->tid;
@@ -41,16 +43,16 @@ index 21a707ba0..2b955e669 100644
 +  __pthread_internal_add(thread);
 +
 +  *stack = child_stack;
-+  *tls = reinterpret_cast<void*>(thread->tls);
++  *tls = &tcb->tls_slot(0);
 +
 +  return 0;
 +}
 diff --git a/libc/bionic/pthread_exit.cpp b/libc/bionic/pthread_exit.cpp
-index f1b65fdf7..34c808474 100644
+index 3b873b314..b3bc2b5a8 100644
 --- a/libc/bionic/pthread_exit.cpp
 +++ b/libc/bionic/pthread_exit.cpp
-@@ -135,3 +135,26 @@ void pthread_exit(void* return_value) {
-   __pthread_unmap_tls(thread);
+@@ -138,3 +138,27 @@ void pthread_exit(void* return_value) {
+   __hwasan_thread_exit();
    __exit(0);
  }
 +
@@ -67,28 +69,32 @@ index f1b65fdf7..34c808474 100644
 +  }
 +
 +  pthread_key_clean_all();
-+  __set_tid_address(NULL);
-+  __pthread_internal_remove(thread);
-+
-+  *stack = thread->attr.stack_base;
-+  *size = thread->mmap_size;
 +
 +  ScopedSignalBlocker ssb;
-+  __pthread_unmap_tls(thread);
++
++  __free_dynamic_tls(__get_bionic_tcb());
++  __set_tid_address(nullptr);
++  __pthread_internal_remove(thread);
++
++  *stack = thread->mmap_base;
++  *size = thread->mmap_size;
 +}
-diff --git a/libc/libc.arm.map b/libc/libc.arm.map
-index b0f96a9ff..4b86e4ba0 100644
---- a/libc/libc.arm.map
-+++ b/libc/libc.arm.map
-@@ -1655,4 +1655,6 @@ LIBC_PLATFORM {
-     malloc_disable;
-     malloc_enable;
-     malloc_iterate;
+diff --git a/libc/libc.map.txt b/libc/libc.map.txt
+index 88192239a..d47e30086 100644
+--- a/libc/libc.map.txt
++++ b/libc/libc.map.txt
+@@ -1478,6 +1478,9 @@ LIBC_Q { # introduced=Q
+ 
+     # Used by libandroid_runtime, libmedia and libmediautils
+     android_mallopt; # apex
++
 +    __pthread_allocate_self;
 +    __pthread_deallocate_self;
  } LIBC_P;
+ 
+ LIBC_PRIVATE {
 diff --git a/libc/private/bionic_fortify.h b/libc/private/bionic_fortify.h
-index 7f22963cb..97f6611ef 100644
+index 3c3292e58..55064a936 100644
 --- a/libc/private/bionic_fortify.h
 +++ b/libc/private/bionic_fortify.h
 @@ -38,7 +38,7 @@
@@ -101,10 +107,10 @@ index 7f22963cb..97f6611ef 100644
    abort();
  }
 diff --git a/linker/linker.cpp b/linker/linker.cpp
-index c78b9aba6..920e6254e 100644
+index b59df7302..5b7c79408 100644
 --- a/linker/linker.cpp
 +++ b/linker/linker.cpp
-@@ -87,10 +87,10 @@ static LinkerTypeAllocator<LinkedListEntry<soinfo>> g_soinfo_links_allocator;
+@@ -85,10 +85,10 @@ static LinkerTypeAllocator<LinkedListEntry<soinfo>> g_soinfo_links_allocator;
  static LinkerTypeAllocator<android_namespace_t> g_namespace_allocator;
  static LinkerTypeAllocator<LinkedListEntry<android_namespace_t>> g_namespace_list_allocator;
  
@@ -117,21 +123,30 @@ index c78b9aba6..920e6254e 100644
 +static const char* const kLdConfigVndkLiteFilePath = "/system/lib/arm/ld.config.vndk_lite.txt";
  
  #if defined(__LP64__)
- static const char* const kSystemLibDir     = "/system/lib64";
-@@ -100,7 +100,7 @@ static const char* const kAsanSystemLibDir = "/data/asan/system/lib64";
- static const char* const kAsanOdmLibDir    = "/data/asan/odm/lib64";
- static const char* const kAsanVendorLibDir = "/data/asan/vendor/lib64";
+ static const char* const kSystemLibDir        = "/system/lib64";
+@@ -99,7 +99,8 @@ static const char* const kAsanOdmLibDir       = "/data/asan/odm/lib64";
+ static const char* const kAsanVendorLibDir    = "/data/asan/vendor/lib64";
+ static const char* const kRuntimeApexLibDir   = "/apex/com.android.runtime/lib64";
  #else
--static const char* const kSystemLibDir     = "/system/lib";
-+static const char* const kSystemLibDir     = "/system/lib/arm";
- static const char* const kOdmLibDir        = "/odm/lib";
- static const char* const kVendorLibDir     = "/vendor/lib";
- static const char* const kAsanSystemLibDir = "/data/asan/system/lib";
+-static const char* const kSystemLibDir        = "/system/lib";
++static const char* const kSystemLibDir        = "/system/lib/arm";
++static const char* const kSystemNbLibDir      = "/system/lib/arm/nb";
+ static const char* const kOdmLibDir           = "/odm/lib";
+ static const char* const kVendorLibDir        = "/vendor/lib";
+ static const char* const kAsanSystemLibDir    = "/data/asan/system/lib";
+@@ -111,6 +112,7 @@ static const char* const kRuntimeApexLibDir   = "/apex/com.android.runtime/lib";
+ static const char* const kAsanLibDirPrefix = "/data/asan";
+ 
+ static const char* const kDefaultLdPaths[] = {
++  kSystemNbLibDir,
+   kSystemLibDir,
+   kOdmLibDir,
+   kVendorLibDir,
 diff --git a/linker/linker_phdr.cpp b/linker/linker_phdr.cpp
-index a5eab44ec..1d009b1b8 100644
+index 353428730..5c483ceed 100644
 --- a/linker/linker_phdr.cpp
 +++ b/linker/linker_phdr.cpp
-@@ -679,6 +679,8 @@ bool ElfReader::LoadSegments() {
+@@ -656,6 +656,8 @@ bool ElfReader::LoadSegments() {
          DL_ERR("couldn't map \"%s\" segment %zd: %s", name_.c_str(), i, strerror(errno));
          return false;
        }
