@@ -147,11 +147,21 @@ RUNTIME_ENVIRONMENT="$RUNTIME_ENVIRONMENT $TARGET_OUT/lib/libxml2.so"
 RUNTIME_ENVIRONMENT="$RUNTIME_ENVIRONMENT $TARGET_OUT/lib/libziparchive.so"
 RUNTIME_ENVIRONMENT="$RUNTIME_ENVIRONMENT $TARGET_OUT/lib/libz.so"
 RUNTIME_ENVIRONMENT="$RUNTIME_ENVIRONMENT $TARGET_OUT/lib/server_configurable_flags.so"
+RUNTIME_NB_ENVIRONMENT="$RUNTIME_NB_ENVIRONMENT $TARGET_OUT/lib/nb/libEGL-nb.so"
+RUNTIME_NB_ENVIRONMENT="$RUNTIME_NB_ENVIRONMENT $TARGET_OUT/lib/nb/libGLESv1_CM-nb.so"
+RUNTIME_NB_ENVIRONMENT="$RUNTIME_NB_ENVIRONMENT $TARGET_OUT/lib/nb/libGLESv2-nb.so"
+RUNTIME_NB_ENVIRONMENT="$RUNTIME_NB_ENVIRONMENT $TARGET_OUT/lib/nb/libGLESv3-nb.so"
 
 adb shell mount -o rw,remount /
 
 trap 'adb shell mount -o ro,remount /' EXIT
 
+adb push $TARGET_OUT/lib/libnb-qemu-guest.so /system/lib/libnb-qemu-guest.so
+
 for f in $RUNTIME_ENVIRONMENT; do
 	adb push $f /system/lib/arm/`basename $f`
+done
+
+for f in $RUNTIME_NB_ENVIRONMENT; do
+	adb push $f /system/lib/arm/nb/`basename $f | sed -e 's/-nb//'`
 done

@@ -26,6 +26,41 @@ LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_LDFLAGS := -Wl,-dynamic-linker,/system/lib/arm/linker
 include $(BUILD_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libEGL-nb
+LOCAL_SRC_FILES := libEGL.c
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_MODULE_RELATIVE_PATH := nb
+LOCAL_ARM_MODE := arm
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libGLESv1_CM-nb
+LOCAL_SRC_FILES := libGLESv1_CM.c
+LOCAL_LDFLAGS = -Wl,-soname,libGLESv1_CM.so
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_MODULE_RELATIVE_PATH := nb
+LOCAL_ARM_MODE := arm
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libGLESv2-nb
+LOCAL_SRC_FILES := libGLESv3.c
+LOCAL_LDFLAGS = -Wl,-soname,libGLESv2.so
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_MODULE_RELATIVE_PATH := nb
+LOCAL_ARM_MODE := arm
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libGLESv3-nb
+LOCAL_SRC_FILES := libGLESv3.c
+LOCAL_LDFLAGS = -Wl,-soname,libGLESv3.so
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_MODULE_RELATIVE_PATH := nb
+LOCAL_ARM_MODE := arm
+include $(BUILD_SHARED_LIBRARY)
+
 QEMU_RUNTIME_ENVIRONMENT := \
 	$(TARGET_OUT)/apex/com.android.runtime.debug/lib/bionic/libc.so \
 	$(TARGET_OUT)/apex/com.android.runtime.debug/lib/bionic/libdl.so \
@@ -173,6 +208,12 @@ QEMU_RUNTIME_ENVIRONMENT := \
 	$(TARGET_OUT)/lib/libz.so \
 	$(TARGET_OUT)/lib/server_configurable_flags.so
 
-libnb-qemu-runtime: $(QEMU_RUNTIME_ENVIRONMENT)
+QEMU_RUNTIME_NB_ENVIRONMENT := \
+	$(TARGET_OUT)/lib/nb/libEGL-nb.so \
+	$(TARGET_OUT)/lib/nb/libGLESv1_CM-nb.so \
+	$(TARGET_OUT)/lib/nb/libGLESv2-nb.so \
+	$(TARGET_OUT)/lib/nb/libGLESv3-nb.so
+
+libnb-qemu-runtime: $(TARGET_OUT)/lib/libnb-qemu-guest.so $(QEMU_RUNTIME_NB_ENVIRONMENT) $(QEMU_RUNTIME_ENVIRONMENT)
 
 .PHONY: libnb-qemu-runtime libnb-qemu-runtime-copy
