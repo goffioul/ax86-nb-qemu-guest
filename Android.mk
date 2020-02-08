@@ -61,6 +61,15 @@ LOCAL_MODULE_RELATIVE_PATH := nb
 LOCAL_ARM_MODE := arm
 include $(BUILD_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libOpenSLES-nb
+LOCAL_SRC_FILES := libOpenSLES.c
+LOCAL_LDFLAGS = -Wl,-soname,libOpenSLES.so
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_MODULE_RELATIVE_PATH := nb
+LOCAL_ARM_MODE := arm
+include $(BUILD_SHARED_LIBRARY)
+
 QEMU_RUNTIME_ENVIRONMENT := \
 	$(TARGET_OUT)/apex/com.android.runtime.debug/lib/bionic/libc.so \
 	$(TARGET_OUT)/apex/com.android.runtime.debug/lib/bionic/libdl.so \
@@ -212,7 +221,8 @@ QEMU_RUNTIME_NB_ENVIRONMENT := \
 	$(TARGET_OUT)/lib/nb/libEGL-nb.so \
 	$(TARGET_OUT)/lib/nb/libGLESv1_CM-nb.so \
 	$(TARGET_OUT)/lib/nb/libGLESv2-nb.so \
-	$(TARGET_OUT)/lib/nb/libGLESv3-nb.so
+	$(TARGET_OUT)/lib/nb/libGLESv3-nb.so \
+	$(TARGET_OUT)/lib/nb/libOpenSLES-nb.so
 
 libnb-qemu-runtime: $(TARGET_OUT)/lib/libnb-qemu-guest.so $(QEMU_RUNTIME_NB_ENVIRONMENT) $(QEMU_RUNTIME_ENVIRONMENT)
 
