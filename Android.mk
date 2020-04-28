@@ -63,8 +63,22 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libOpenSLES-nb
-LOCAL_SRC_FILES := libOpenSLES.c
+LOCAL_SRC_FILES := \
+	libOpenSLES.c \
+	libOpenSLES.iid.c \
+	libOpenSLES.itf.cpp
+LOCAL_CFLAGS := -fvisibility=hidden
 LOCAL_LDFLAGS = -Wl,-soname,libOpenSLES.so
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_HEADER_LIBRARIES := libOpenSLES_headers
+LOCAL_MODULE_RELATIVE_PATH := nb
+LOCAL_ARM_MODE := arm
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libandroid-nb
+LOCAL_SRC_FILES := libandroid.c
+LOCAL_LDFLAGS = -Wl,-soname,libandroid.so
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_MODULE_RELATIVE_PATH := nb
 LOCAL_ARM_MODE := arm
