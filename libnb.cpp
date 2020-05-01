@@ -23,6 +23,7 @@
 #include <dlfcn.h>
 #include <string.h>
 #include <log/log.h>
+#include <utils/CallStack.h>
 
 static char nb_qemu_error[4096] = { '\0' };
 
@@ -70,6 +71,10 @@ int nb_qemu_allocateThread(void **stack, void **tls) {
 
 void nb_qemu_deallocateThread(void **stack, size_t *size) {
     __pthread_deallocate_self(stack, size);
+}
+
+void nb_qemu_printCallStack() {
+    android::CallStack(LOG_TAG);
 }
 
 };

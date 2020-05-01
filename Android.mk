@@ -22,7 +22,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := libnb-qemu-guest
 LOCAL_SRC_FILES := libnb.cpp jnienv.c
-LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_SHARED_LIBRARIES := liblog libutilscallstack
 LOCAL_LDFLAGS := -Wl,-dynamic-linker,/system/lib/arm/linker
 include $(BUILD_SHARED_LIBRARY)
 
