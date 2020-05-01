@@ -406,3 +406,155 @@ __attribute__((naked,noinline)) void ASensor_getVendor() {
         "bx lr"
     );
 }
+__attribute__((naked,noinline)) void AConfiguration_delete() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0733\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AConfiguration_fromAssetManager() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0734\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AConfiguration_getCountry() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0735\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AConfiguration_getDensity() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0736\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AConfiguration_getLanguage() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0737\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AConfiguration_new() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0738\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AInputQueue_attachLooper() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0739\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AInputQueue_detachLooper() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x073a\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AInputQueue_finishEvent() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x073b\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AInputQueue_getEvent() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x073c\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AInputQueue_preDispatchEvent() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x073d\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AInputEvent_getType() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x073e\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getAction() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x073f\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getDownTime() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0740\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getEventTime() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0741\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getPointerCount() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0742\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getPointerId() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0743\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getX() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0744\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void AMotionEvent_getY() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0745\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
