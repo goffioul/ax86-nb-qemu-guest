@@ -1,5 +1,3 @@
-#include <libEGL.common.c>
-
 __attribute__((naked,noinline)) void eglChooseConfig() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
@@ -644,6 +642,22 @@ __attribute__((naked,noinline)) void _Z13eglBeginFramePvS_() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0150\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_eglGetProcAddress() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0151\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glDiscardFramebufferEXT() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0152\n"
         "add sp, sp, #16\n" 
         "bx lr"
     );
