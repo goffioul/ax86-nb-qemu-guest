@@ -662,3 +662,131 @@ __attribute__((naked,noinline)) void libEGL_glDiscardFramebufferEXT() {
         "bx lr"
     );
 }
+__attribute__((naked,noinline)) void libEGL_glDebugMessageControlKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0153\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glDebugMessageInsertKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0154\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glPushDebugGroupKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0155\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glPopDebugGroupKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0156\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glObjectLabelKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0157\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glGetObjectLabelKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0158\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glInsertEventMarkerEXT() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0159\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glPushGroupMarkerEXT() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x015a\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glPopGroupMarkerEXT() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x015b\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glGetQueryObjectui64vEXT() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x015c\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glCopyImageSubDataOES() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x015d\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glDrawElementsBaseVertexOES() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x015e\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glDrawRangeElementsBaseVertexOES() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x015f\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glDrawElementsInstancedBaseVertexOES() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0160\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glMultiDrawElementsBaseVertexEXT() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0161\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void libEGL_glBlendBarrierKHR() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0162\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}

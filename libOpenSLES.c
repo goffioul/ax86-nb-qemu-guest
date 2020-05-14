@@ -22,7 +22,7 @@ __attribute__((naked,noinline)) void __nb_SLBufferQueueItf_Clear() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLBufferQueueItf_RegisterCallback() {
+__attribute__((naked,noinline)) void __nb_SLBufferQueueItf_GetState() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0603\n"
@@ -30,7 +30,7 @@ __attribute__((naked,noinline)) void __nb_SLBufferQueueItf_RegisterCallback() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLEffectSendItf_EnableEffectSend() {
+__attribute__((naked,noinline)) void __nb_SLBufferQueueItf_RegisterCallback() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0604\n"
@@ -38,7 +38,7 @@ __attribute__((naked,noinline)) void __nb_SLEffectSendItf_EnableEffectSend() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLEngineItf_CreateAudioPlayer() {
+__attribute__((naked,noinline)) void __nb_SLEffectSendItf_EnableEffectSend() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0605\n"
@@ -46,7 +46,7 @@ __attribute__((naked,noinline)) void __nb_SLEngineItf_CreateAudioPlayer() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLEngineItf_CreateOutputMix() {
+__attribute__((naked,noinline)) void __nb_SLEngineItf_CreateAudioPlayer() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0606\n"
@@ -54,7 +54,7 @@ __attribute__((naked,noinline)) void __nb_SLEngineItf_CreateOutputMix() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLEnvironmentalReverbItf_SetEnvironmentalReverbProperties() {
+__attribute__((naked,noinline)) void __nb_SLEngineItf_CreateOutputMix() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0607\n"
@@ -62,7 +62,7 @@ __attribute__((naked,noinline)) void __nb_SLEnvironmentalReverbItf_SetEnvironmen
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_SetChannelMute() {
+__attribute__((naked,noinline)) void __nb_SLEnvironmentalReverbItf_SetEnvironmentalReverbProperties() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0608\n"
@@ -70,7 +70,7 @@ __attribute__((naked,noinline)) void __nb_SLMuteSoloItf_SetChannelMute() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetChannelMute() {
+__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_SetChannelMute() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0609\n"
@@ -78,7 +78,7 @@ __attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetChannelMute() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_SetChannelSolo() {
+__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetChannelMute() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x060a\n"
@@ -86,7 +86,7 @@ __attribute__((naked,noinline)) void __nb_SLMuteSoloItf_SetChannelSolo() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetChannelSolo() {
+__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_SetChannelSolo() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x060b\n"
@@ -94,7 +94,7 @@ __attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetChannelSolo() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetNumChannels() {
+__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetChannelSolo() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x060c\n"
@@ -102,7 +102,7 @@ __attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetNumChannels() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_Realize() {
+__attribute__((naked,noinline)) void __nb_SLMuteSoloItf_GetNumChannels() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x060d\n"
@@ -110,7 +110,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_Realize() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_Resume() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_Realize() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x060e\n"
@@ -118,7 +118,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_Resume() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_GetState() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_Resume() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x060f\n"
@@ -126,7 +126,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_GetState() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_GetInterface() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_GetState() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0610\n"
@@ -134,7 +134,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_GetInterface() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_RegisterCallback() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_GetInterface() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0611\n"
@@ -142,7 +142,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_RegisterCallback() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_AbortAsyncOperation() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_RegisterCallback() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0612\n"
@@ -150,7 +150,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_AbortAsyncOperation() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_Destroy() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_AbortAsyncOperation() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0613\n"
@@ -158,7 +158,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_Destroy() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_SetPriority() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_Destroy() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0614\n"
@@ -166,7 +166,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_SetPriority() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_GetPriority() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_SetPriority() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0615\n"
@@ -174,7 +174,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_GetPriority() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLObjectItf_SetLossOfControlInterfaces() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_GetPriority() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0616\n"
@@ -182,7 +182,7 @@ __attribute__((naked,noinline)) void __nb_SLObjectItf_SetLossOfControlInterfaces
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_SetPlayState() {
+__attribute__((naked,noinline)) void __nb_SLObjectItf_SetLossOfControlInterfaces() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0617\n"
@@ -190,7 +190,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_SetPlayState() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_GetPlayState() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_SetPlayState() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0618\n"
@@ -198,7 +198,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_GetPlayState() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_GetDuration() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_GetPlayState() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0619\n"
@@ -206,7 +206,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_GetDuration() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_GetPosition() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_GetDuration() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x061a\n"
@@ -214,7 +214,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_GetPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_RegisterCallback() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_GetPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x061b\n"
@@ -222,7 +222,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_RegisterCallback() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_SetCallbackEventsMask() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_RegisterCallback() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x061c\n"
@@ -230,7 +230,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_SetCallbackEventsMask() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_GetCallbackEventsMask() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_SetCallbackEventsMask() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x061d\n"
@@ -238,7 +238,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_GetCallbackEventsMask() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_SetMarkerPosition() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_GetCallbackEventsMask() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x061e\n"
@@ -246,7 +246,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_SetMarkerPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_ClearMarkerPosition() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_SetMarkerPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x061f\n"
@@ -254,7 +254,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_ClearMarkerPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_GetMarkerPosition() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_ClearMarkerPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0620\n"
@@ -262,7 +262,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_GetMarkerPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_SetPositionUpdatePeriod() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_GetMarkerPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0621\n"
@@ -270,7 +270,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_SetPositionUpdatePeriod() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlayItf_GetPositionUpdatePeriod() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_SetPositionUpdatePeriod() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0622\n"
@@ -278,7 +278,7 @@ __attribute__((naked,noinline)) void __nb_SLPlayItf_GetPositionUpdatePeriod() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_SetRate() {
+__attribute__((naked,noinline)) void __nb_SLPlayItf_GetPositionUpdatePeriod() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0623\n"
@@ -286,7 +286,7 @@ __attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_SetRate() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetRate() {
+__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_SetRate() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0624\n"
@@ -294,7 +294,7 @@ __attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetRate() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_SetPropertyConstraints() {
+__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetRate() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0625\n"
@@ -302,7 +302,7 @@ __attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_SetPropertyConstrain
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetProperties() {
+__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_SetPropertyConstraints() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0626\n"
@@ -310,7 +310,7 @@ __attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetProperties() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetCapabilitiesOfRate() {
+__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetProperties() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0627\n"
@@ -318,7 +318,7 @@ __attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetCapabilitiesOfRat
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetRateRange() {
+__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetCapabilitiesOfRate() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0628\n"
@@ -326,7 +326,7 @@ __attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetRateRange() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLSeekItf_SetPosition() {
+__attribute__((naked,noinline)) void __nb_SLPlaybackRateItf_GetRateRange() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0629\n"
@@ -334,7 +334,7 @@ __attribute__((naked,noinline)) void __nb_SLSeekItf_SetPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLSeekItf_SetLoop() {
+__attribute__((naked,noinline)) void __nb_SLSeekItf_SetPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x062a\n"
@@ -342,7 +342,7 @@ __attribute__((naked,noinline)) void __nb_SLSeekItf_SetLoop() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLSeekItf_GetLoop() {
+__attribute__((naked,noinline)) void __nb_SLSeekItf_SetLoop() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x062b\n"
@@ -350,7 +350,7 @@ __attribute__((naked,noinline)) void __nb_SLSeekItf_GetLoop() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_SetVolumeLevel() {
+__attribute__((naked,noinline)) void __nb_SLSeekItf_GetLoop() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x062c\n"
@@ -358,7 +358,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_SetVolumeLevel() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetVolumeLevel() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_SetVolumeLevel() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x062d\n"
@@ -366,7 +366,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_GetVolumeLevel() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetMaxVolumeLevel() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetVolumeLevel() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x062e\n"
@@ -374,7 +374,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_GetMaxVolumeLevel() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_SetMute() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetMaxVolumeLevel() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x062f\n"
@@ -382,7 +382,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_SetMute() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetMute() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_SetMute() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0630\n"
@@ -390,7 +390,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_GetMute() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_EnableStereoPosition() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetMute() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0631\n"
@@ -398,7 +398,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_EnableStereoPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_IsEnabledStereoPosition() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_EnableStereoPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0632\n"
@@ -406,7 +406,7 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_IsEnabledStereoPosition() 
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_SetStereoPosition() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_IsEnabledStereoPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0633\n"
@@ -414,10 +414,82 @@ __attribute__((naked,noinline)) void __nb_SLVolumeItf_SetStereoPosition() {
         "bx lr"
     );
 }
-__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetStereoPosition() {
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_SetStereoPosition() {
     __asm__ volatile(
         "push {r0, r1, r2, r3}\n"
         "svc #0x0634\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLVolumeItf_GetStereoPosition() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0635\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidConfigurationItf_SetConfiguration() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0636\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidConfigurationItf_GetConfiguration() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0637\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidConfigurationItf_AcquireJavaProxy() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0638\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidConfigurationItf_ReleaseJavaProxy() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x0639\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidSimpleBufferQueueItf_Enqueue() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x063a\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidSimpleBufferQueueItf_Clear() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x063b\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidSimpleBufferQueueItf_GetState() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x063c\n"
+        "add sp, sp, #16\n" 
+        "bx lr"
+    );
+}
+__attribute__((naked,noinline)) void __nb_SLAndroidSimpleBufferQueueItf_RegisterCallback() {
+    __asm__ volatile(
+        "push {r0, r1, r2, r3}\n"
+        "svc #0x063d\n"
         "add sp, sp, #16\n" 
         "bx lr"
     );

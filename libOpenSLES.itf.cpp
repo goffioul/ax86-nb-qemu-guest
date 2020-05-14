@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <cutils/log.h>
 #include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 
 extern "C" {
 
@@ -17,6 +18,7 @@ SLresult __nb_slCreateEngine(
 
 SLresult __nb_SLBufferQueueItf_Enqueue(SLBufferQueueItf, const void *, SLuint32);
 SLresult __nb_SLBufferQueueItf_Clear(SLBufferQueueItf);
+SLresult __nb_SLBufferQueueItf_GetState(SLBufferQueueItf, SLBufferQueueState *);
 SLresult __nb_SLBufferQueueItf_RegisterCallback(SLBufferQueueItf, slBufferQueueCallback, void *);
 
 SLresult __nb_SLEffectSendItf_EnableEffectSend(SLEffectSendItf, const void *, SLboolean, SLmillibel);
@@ -77,6 +79,16 @@ SLresult __nb_SLVolumeItf_IsEnabledStereoPosition(SLVolumeItf, SLboolean *);
 SLresult __nb_SLVolumeItf_SetStereoPosition(SLVolumeItf, SLpermille);
 SLresult __nb_SLVolumeItf_GetStereoPosition(SLVolumeItf, SLpermille *);
 
+SLresult __nb_SLAndroidConfigurationItf_SetConfiguration(SLAndroidConfigurationItf, const SLchar *, const void *, SLuint32);
+SLresult __nb_SLAndroidConfigurationItf_GetConfiguration(SLAndroidConfigurationItf, const SLchar *, uint32_t *, void *);
+SLresult __nb_SLAndroidConfigurationItf_AcquireJavaProxy(SLAndroidConfigurationItf, SLuint32, jobject *);
+SLresult __nb_SLAndroidConfigurationItf_ReleaseJavaProxy(SLAndroidConfigurationItf, SLuint32);
+
+SLresult __nb_SLAndroidSimpleBufferQueueItf_Enqueue(SLAndroidSimpleBufferQueueItf, const void *, SLuint32);
+SLresult __nb_SLAndroidSimpleBufferQueueItf_Clear(SLAndroidSimpleBufferQueueItf);
+SLresult __nb_SLAndroidSimpleBufferQueueItf_GetState(SLAndroidSimpleBufferQueueItf, SLAndroidSimpleBufferQueueState *);
+SLresult __nb_SLAndroidSimpleBufferQueueItf_RegisterCallback(SLAndroidSimpleBufferQueueItf, slAndroidSimpleBufferQueueCallback, void *);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,6 +133,8 @@ DEFINE_SIMPLE_CALLBACK_INTERFACE(Play)
 DEFINE_SIMPLE_INTERFACE(PlaybackRate)
 DEFINE_SIMPLE_INTERFACE(Seek)
 DEFINE_SIMPLE_INTERFACE(Volume)
+DEFINE_SIMPLE_INTERFACE(AndroidConfiguration)
+DEFINE_SIMPLE_CALLBACK_INTERFACE(AndroidSimpleBufferQueue)
 
 #undef DEFINE_INTERFACE
 
@@ -155,8 +169,8 @@ static SLresult SLBufferQueueItf_Clear(SLBufferQueueItf self)
 
 static SLresult SLBufferQueueItf_GetState(SLBufferQueueItf self, SLBufferQueueState *pState)
 {
-    LOG_ALWAYS_FATAL("SLBufferQueueItf_GetState");
-    return SL_RESULT_UNKNOWN_ERROR;
+    nb_BufferQueue *thiz = (nb_BufferQueue *) self;
+    return __nb_SLBufferQueueItf_GetState(thiz->mNativeItf, pState);
 }
 
 static SLresult SLBufferQueueItf_RegisterCallback(SLBufferQueueItf self, slBufferQueueCallback callback, void *pContext)
@@ -889,6 +903,88 @@ static const struct SLVolumeItf_ nb_Volume_itf = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static SLresult SLAndroidConfigurationItf_SetConfiguration(SLAndroidConfigurationItf self, const SLchar *configKey, const void *pConfigValue, SLuint32 valueSize)
+{
+    nb_AndroidConfiguration *thiz = (nb_AndroidConfiguration *) self;
+    return __nb_SLAndroidConfigurationItf_SetConfiguration(thiz->mNativeItf, configKey, pConfigValue, valueSize);
+}
+
+static SLresult SLAndroidConfigurationItf_GetConfiguration(SLAndroidConfigurationItf self, const SLchar *configKey, uint32_t *pValueSize, void *pConfigValue)
+{
+    nb_AndroidConfiguration *thiz = (nb_AndroidConfiguration *) self;
+    return __nb_SLAndroidConfigurationItf_GetConfiguration(thiz->mNativeItf, configKey, pValueSize, pConfigValue);
+}
+
+static SLresult SLAndroidConfigurationItf_AcquireJavaProxy(SLAndroidConfigurationItf self, SLuint32 proxyType, jobject *pProxyObj)
+{
+    nb_AndroidConfiguration *thiz = (nb_AndroidConfiguration *) self;
+    return __nb_SLAndroidConfigurationItf_AcquireJavaProxy(thiz->mNativeItf, proxyType, pProxyObj);
+}
+
+static SLresult SLAndroidConfigurationItf_ReleaseJavaProxy(SLAndroidConfigurationItf self, SLuint32 proxyType)
+{
+    nb_AndroidConfiguration *thiz = (nb_AndroidConfiguration *) self;
+    return __nb_SLAndroidConfigurationItf_ReleaseJavaProxy(thiz->mNativeItf, proxyType);
+}
+
+static const struct SLAndroidConfigurationItf_ nb_AndroidConfiguration_itf = {
+    .SetConfiguration = SLAndroidConfigurationItf_SetConfiguration,
+    .GetConfiguration = SLAndroidConfigurationItf_GetConfiguration,
+    .AcquireJavaProxy = SLAndroidConfigurationItf_AcquireJavaProxy,
+    .ReleaseJavaProxy = SLAndroidConfigurationItf_ReleaseJavaProxy
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void SLAndroidSimpleBufferQueueItf_callback(SLAndroidSimpleBufferQueueItf nativeCaller, void *pContext)
+{
+    nb_AndroidSimpleBufferQueue *thiz = (nb_AndroidSimpleBufferQueue *) pContext;
+
+    if (thiz->mNativeItf == nativeCaller && thiz->mCallback != nullptr) {
+        thiz->mCallback(&thiz->mItf, thiz->mContext);
+    } else if (thiz->mNativeItf != nativeCaller) {
+        ALOGE("SLAndroidSimpleBufferQueueItf_callback: misconfigured callback");
+    }
+}
+
+static SLresult SLAndroidSimpleBufferQueueItf_Enqueue(SLAndroidSimpleBufferQueueItf self, const void *pBuffer, SLuint32 size)
+{
+    nb_AndroidSimpleBufferQueue *thiz = (nb_AndroidSimpleBufferQueue *) self;
+    return __nb_SLAndroidSimpleBufferQueueItf_Enqueue(thiz->mNativeItf, pBuffer, size);
+}
+
+static SLresult SLAndroidSimpleBufferQueueItf_Clear(SLAndroidSimpleBufferQueueItf self)
+{
+    nb_AndroidSimpleBufferQueue *thiz = (nb_AndroidSimpleBufferQueue *) self;
+    return __nb_SLAndroidSimpleBufferQueueItf_Clear(thiz->mNativeItf);
+}
+
+static SLresult SLAndroidSimpleBufferQueueItf_GetState(SLAndroidSimpleBufferQueueItf self, SLAndroidSimpleBufferQueueState *pState)
+{
+    nb_AndroidSimpleBufferQueue *thiz = (nb_AndroidSimpleBufferQueue *) self;
+    return __nb_SLAndroidSimpleBufferQueueItf_GetState(thiz->mNativeItf, pState);
+}
+
+static SLresult SLAndroidSimpleBufferQueueItf_RegisterCallback(SLAndroidSimpleBufferQueueItf self, slAndroidSimpleBufferQueueCallback callback, void *pContext)
+{
+    nb_AndroidSimpleBufferQueue *thiz = (nb_AndroidSimpleBufferQueue *) self;
+    SLresult ret = __nb_SLAndroidSimpleBufferQueueItf_RegisterCallback(thiz->mNativeItf, SLAndroidSimpleBufferQueueItf_callback, thiz);
+    if (ret == SL_RESULT_SUCCESS) {
+        thiz->mCallback = callback;
+        thiz->mContext = pContext;
+    }
+    return ret;
+}
+
+static const struct SLAndroidSimpleBufferQueueItf_ nb_AndroidSimpleBufferQueue_itf = {
+    .Enqueue = SLAndroidSimpleBufferQueueItf_Enqueue,
+    .Clear = SLAndroidSimpleBufferQueueItf_Clear,
+    .GetState = SLAndroidSimpleBufferQueueItf_GetState,
+    .RegisterCallback = SLAndroidSimpleBufferQueueItf_RegisterCallback
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 static nb_Object* wrap_Object(SLObjectItf nativeItf)
 {
     nb_Object *obj = (nb_Object *) calloc(1, sizeof(nb_Object));
@@ -955,6 +1051,10 @@ static nb_Interface* wrap_Interface(void *nativeItf, SLInterfaceID iid, nb_Objec
         obj = wrap_ObjectInterface(sizeof(nb_Seek), (void *) &nb_Seek_itf, nativeItf);
     else if (iid == SL_IID_VOLUME)
         obj = wrap_ObjectInterface(sizeof(nb_Volume), (void *) &nb_Volume_itf, nativeItf);
+    else if (iid == SL_IID_ANDROIDCONFIGURATION)
+        obj = wrap_ObjectInterface(sizeof(nb_AndroidConfiguration), (void *) &nb_AndroidConfiguration_itf, nativeItf);
+    else if (iid == SL_IID_ANDROIDSIMPLEBUFFERQUEUE)
+        obj = wrap_ObjectInterface(sizeof(nb_AndroidSimpleBufferQueue), (void *) &nb_AndroidSimpleBufferQueue_itf, nativeItf);
 #endif
 
     if (obj == nullptr) {
