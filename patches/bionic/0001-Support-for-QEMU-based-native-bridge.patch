@@ -1,26 +1,76 @@
-From cf3ee711c615e2af6647c7e64d10c425cff3e0c8 Mon Sep 17 00:00:00 2001
-From: Michael Goffioul <michael.goffioul@lincor.com>
-Date: Thu, 21 Nov 2019 19:22:39 -0500
+From 6184117f3aaedcf1085230c66e31386aa60eb1eb Mon Sep 17 00:00:00 2001
+From: Michael Goffioul <michael.goffioul@gmail.com>
+Date: Mon, 18 May 2020 19:37:23 -0400
 Subject: [PATCH] Support for QEMU-based native bridge
 
 Change-Id: I9f79292e64dab0f9382a6ee08a62c0cc56a1ee39
 ---
- libc/bionic/pthread_create.cpp | 26 ++++++++++++++++++++++++++
- libc/bionic/pthread_exit.cpp   | 24 ++++++++++++++++++++++++
- libc/libc.map.txt              |  3 +++
- libc/private/bionic_fortify.h  |  2 +-
- linker/linker.cpp              | 10 ++++++----
- linker/linker_phdr.cpp         |  2 ++
- 6 files changed, 62 insertions(+), 5 deletions(-)
+ libc/bionic/malloc_common.cpp         |  3 ++
+ libc/bionic/malloc_common_dynamic.cpp |  9 +++++
+ libc/bionic/pthread_create.cpp        | 28 +++++++++++++++
+ libc/bionic/pthread_exit.cpp          | 24 +++++++++++++
+ libc/libc.map.txt                     |  3 ++
+ libc/malloc_debug/malloc_debug.cpp    | 49 +++++++++++++++++++++++++++
+ libc/private/bionic_fortify.h         |  2 +-
+ linker/linker.cpp                     | 10 +++---
+ linker/linker_phdr.cpp                |  2 ++
+ 9 files changed, 125 insertions(+), 5 deletions(-)
 
+diff --git a/libc/bionic/malloc_common.cpp b/libc/bionic/malloc_common.cpp
+index 9dc4d12d1..335601b7c 100644
+--- a/libc/bionic/malloc_common.cpp
++++ b/libc/bionic/malloc_common.cpp
+@@ -67,6 +67,9 @@ extern "C" void* calloc(size_t n_elements, size_t elem_size) {
+   if (__predict_false(result == nullptr)) {
+     warning_log("calloc(%zu, %zu) failed: returning null pointer", n_elements, elem_size);
+   }
++  if (result != nullptr) {
++    memset(result, 0, n_elements * elem_size);
++  }
+   return result;
+ }
+ 
+diff --git a/libc/bionic/malloc_common_dynamic.cpp b/libc/bionic/malloc_common_dynamic.cpp
+index 803574649..12fa44782 100644
+--- a/libc/bionic/malloc_common_dynamic.cpp
++++ b/libc/bionic/malloc_common_dynamic.cpp
+@@ -69,6 +69,8 @@
+ #include "malloc_heapprofd.h"
+ #include "malloc_limit.h"
+ 
++//#define MALLOC_DEBUG
++
+ // =============================================================================
+ // Global variables instantations.
+ // =============================================================================
+@@ -231,10 +233,17 @@ static bool CheckLoadMallocHooks(char** options) {
+ 
+ static bool CheckLoadMallocDebug(char** options) {
+   // If kDebugMallocEnvOptions is set then it overrides the system properties.
++#ifdef MALLOC_DEBUG
++  static char nb_qemu_options[] = "abort_on_error verify_pointers fill verbose";
++#endif
+   char* env = getenv(kDebugEnvOptions);
+   if (env == nullptr || env[0] == '\0') {
+     if (__system_property_get(kDebugPropertyOptions, *options) == 0 || *options[0] == '\0') {
++#ifdef MALLOC_DEBUG
++      *options = nb_qemu_options;
++#else
+       return false;
++#endif
+     }
+ 
+     // Check to see if only a specific program should have debug malloc enabled.
 diff --git a/libc/bionic/pthread_create.cpp b/libc/bionic/pthread_create.cpp
-index 4cf14ad72..3a857bbf4 100644
+index 4cf14ad72..9a2f65f2f 100644
 --- a/libc/bionic/pthread_create.cpp
 +++ b/libc/bionic/pthread_create.cpp
-@@ -428,3 +428,29 @@ int pthread_create(pthread_t* thread_out, pthread_attr_t const* attr,
+@@ -428,3 +428,31 @@ int pthread_create(pthread_t* thread_out, pthread_attr_t const* attr,
  
    return 0;
  }
++
++extern "C" pid_t __getpid();
 +
 +extern "C"
 +int __pthread_allocate_self(void **stack, void **tls) {
@@ -37,7 +87,7 @@ index 4cf14ad72..3a857bbf4 100644
 +
 +  pthread_internal_t* thread = tcb->thread();
 +
-+  thread->set_cached_pid(getpid());
++  thread->set_cached_pid(__getpid());
 +  thread->tid = __get_thread()->tid;
 +  __init_thread(thread);
 +  __pthread_internal_add(thread);
@@ -93,6 +143,113 @@ index 88192239a..d47e30086 100644
  } LIBC_P;
  
  LIBC_PRIVATE {
+diff --git a/libc/malloc_debug/malloc_debug.cpp b/libc/malloc_debug/malloc_debug.cpp
+index 53fcead01..00fd7d616 100644
+--- a/libc/malloc_debug/malloc_debug.cpp
++++ b/libc/malloc_debug/malloc_debug.cpp
+@@ -54,6 +54,8 @@
+ #include "malloc_debug.h"
+ #include "UnwindBacktrace.h"
+ 
++//#define MALLOC_DEBUG
++
+ // ------------------------------------------------------------------------
+ // Global Data
+ // ------------------------------------------------------------------------
+@@ -420,7 +422,11 @@ static void* InternalMalloc(size_t size) {
+   return pointer;
+ }
+ 
++#ifdef MALLOC_DEBUG
++void* _debug_malloc(size_t size) {
++#else
+ void* debug_malloc(size_t size) {
++#endif
+   if (DebugCallsDisabled()) {
+     return g_dispatch->malloc(size);
+   }
+@@ -496,7 +502,11 @@ static void InternalFree(void* pointer) {
+   }
+ }
+ 
++#ifdef MALLOC_DEBUG
++void _debug_free(void* pointer) {
++#else
+ void debug_free(void* pointer) {
++#endif
+   if (DebugCallsDisabled() || pointer == nullptr) {
+     return g_dispatch->free(pointer);
+   }
+@@ -514,7 +524,11 @@ void debug_free(void* pointer) {
+   InternalFree(pointer);
+ }
+ 
++#ifdef MALLOC_DEBUG
++void* _debug_memalign(size_t alignment, size_t bytes) {
++#else
+ void* debug_memalign(size_t alignment, size_t bytes) {
++#endif
+   if (DebugCallsDisabled()) {
+     return g_dispatch->memalign(alignment, bytes);
+   }
+@@ -593,7 +607,11 @@ void* debug_memalign(size_t alignment, size_t bytes) {
+   return pointer;
+ }
+ 
++#ifdef MALLOC_DEBUG
++void* _debug_realloc(void* pointer, size_t bytes) {
++#else
+ void* debug_realloc(void* pointer, size_t bytes) {
++#endif
+   if (DebugCallsDisabled()) {
+     return g_dispatch->realloc(pointer, bytes);
+   }
+@@ -712,7 +730,11 @@ void* debug_realloc(void* pointer, size_t bytes) {
+   return new_pointer;
+ }
+ 
++#ifdef MALLOC_DEBUG
++void* _debug_calloc(size_t nmemb, size_t bytes) {
++#else
+ void* debug_calloc(size_t nmemb, size_t bytes) {
++#endif
+   if (DebugCallsDisabled()) {
+     return g_dispatch->calloc(nmemb, bytes);
+   }
+@@ -766,6 +788,33 @@ void* debug_calloc(size_t nmemb, size_t bytes) {
+   return pointer;
+ }
+ 
++#ifdef MALLOC_DEBUG
++void* debug_malloc(size_t size) {
++  void* pointer = _debug_malloc(size);
++  info_log("malloc[%d] => %p", size, pointer);
++  return pointer;
++}
++void debug_free(void* pointer) {
++  info_log("free[%p]", pointer);
++  _debug_free(pointer);
++}
++void* debug_memalign(size_t alignment, size_t bytes) {
++  void* pointer = _debug_memalign(alignment, bytes);
++  info_log("memalign[%d, %d] => %p", alignment, bytes, pointer);
++  return pointer;
++}
++void* debug_realloc(void* pointer, size_t bytes) {
++  void* new_pointer = _debug_realloc(pointer, bytes);
++  info_log("realloc[%p, %d] => %p", pointer, bytes, new_pointer);
++  return new_pointer;
++}
++void* debug_calloc(size_t nmemb, size_t bytes) {
++  void* pointer = _debug_calloc(nmemb, bytes);
++  info_log("calloc[%d, %d] => %p", nmemb, bytes, pointer);
++  return pointer;
++}
++#endif
++
+ struct mallinfo debug_mallinfo() {
+   return g_dispatch->mallinfo();
+ }
 diff --git a/libc/private/bionic_fortify.h b/libc/private/bionic_fortify.h
 index 3c3292e58..55064a936 100644
 --- a/libc/private/bionic_fortify.h
@@ -156,5 +313,5 @@ index 353428730..5c483ceed 100644
  
      // if the segment is writable, and does not end on a page boundary,
 -- 
-2.21.0
+2.25.1
 
