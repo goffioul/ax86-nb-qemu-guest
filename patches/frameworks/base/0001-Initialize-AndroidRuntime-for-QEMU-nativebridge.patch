@@ -1,0 +1,99 @@
+From 4d6fda554b6aa1caf97093f5c1298fb5a31a8665 Mon Sep 17 00:00:00 2001
+From: Michael Goffioul <michael.goffioul@gmail.com>
+Date: Mon, 18 May 2020 19:36:29 -0400
+Subject: [PATCH] Initialize AndroidRuntime for QEMU nativebridge
+
+This may not be necessary anymore. Those changes were initiated to
+support OpenSLES, but OpenSLES has now been fully bridge. This needs
+re-assessment.
+
+Change-Id: I1c208b7337b2cbf7abb976f47a03f2f3d77031eb
+---
+ core/jni/Android.bp                           |  2 ++
+ core/jni/AndroidRuntime.cpp                   | 24 +++++++++++++++++++
+ core/jni/core_jni_helpers.h                   |  4 ++++
+ .../include/android_runtime/AndroidRuntime.h  |  4 ++++
+ 4 files changed, 34 insertions(+)
+
+diff --git a/core/jni/Android.bp b/core/jni/Android.bp
+index 0e31ab9c5fb..47ee04e1ea9 100644
+--- a/core/jni/Android.bp
++++ b/core/jni/Android.bp
+@@ -22,6 +22,8 @@ cc_library_shared {
+ 
+         "-DU_USING_ICU_NAMESPACE=0",
+ 
++        "-DNB_QEMU_RUNTIME",
++
+         "-Wall",
+         "-Werror",
+         "-Wno-error=deprecated-declarations",
+diff --git a/core/jni/AndroidRuntime.cpp b/core/jni/AndroidRuntime.cpp
+index cd0b340d489..7a2cdb69b1e 100644
+--- a/core/jni/AndroidRuntime.cpp
++++ b/core/jni/AndroidRuntime.cpp
+@@ -1643,4 +1643,28 @@ AndroidRuntime* AndroidRuntime::getRuntime()
+ extern "C" jint registerFrameworkNatives(JNIEnv* env) {
+     return register_jni_procs(gRegJNI, NELEM(gRegJNI), env);
+ }
++
++#ifdef NB_QEMU_RUNTIME
++
++#include <dlfcn.h>
++
++__attribute__((constructor))
++void AndroidRuntime::nb_qemu_init()
++{
++    ALOGI("nb_qemu_init()");
++
++    void *handle = dlopen(nullptr, RTLD_LAZY);
++    mJavaVM = reinterpret_cast<JavaVM *>(dlsym(handle, "nb_qemu_JavaVM"));
++    ALOGI("JavaVM = %p", mJavaVM);
++
++    androidSetCreateThreadFunc((android_create_thread_fn) javaCreateThreadEtc);
++
++    JNIEnv *env;
++    mJavaVM->GetEnv((void**) &env, JNI_VERSION_1_4);
++
++    //register_android_content_AssetManager(env);
++    //register_android_os_Binder(env);
++}
++
++#endif
+ }   // namespace android
+diff --git a/core/jni/core_jni_helpers.h b/core/jni/core_jni_helpers.h
+index 16ef753c0cd..83abc5c11fe 100644
+--- a/core/jni/core_jni_helpers.h
++++ b/core/jni/core_jni_helpers.h
+@@ -69,9 +69,13 @@ static inline T MakeGlobalRefOrDie(JNIEnv* env, T in) {
+ 
+ static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
+                                        const JNINativeMethod* gMethods, int numMethods) {
++#ifdef NB_QEMU_RUNTIME
++    return 0;
++#else
+     int res = AndroidRuntime::registerNativeMethods(env, className, gMethods, numMethods);
+     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
+     return res;
++#endif
+ }
+ 
+ /**
+diff --git a/core/jni/include/android_runtime/AndroidRuntime.h b/core/jni/include/android_runtime/AndroidRuntime.h
+index 3ec8b1fe903..7fdda0dfa95 100644
+--- a/core/jni/include/android_runtime/AndroidRuntime.h
++++ b/core/jni/include/android_runtime/AndroidRuntime.h
+@@ -152,6 +152,10 @@ private:
+                                 size_t threadStackSize,
+                                 android_thread_id_t* threadId);
+     static int javaThreadShell(void* args);
++
++#ifdef NB_QEMU_RUNTIME
++    static void nb_qemu_init();
++#endif
+ };
+ 
+ }
+-- 
+2.25.1
+
